@@ -1,1 +1,1 @@
-whois curl nmap traceroute arandr zsh vim git wget apt-transport-https earlyoom gpg gpg-agent certbot python3-certbot-nginx
+whois curl nmap traceroute zsh vim git wget apt-transport-https earlyoom gpg gpg-agent certbot python3-certbot-nginx nginx
