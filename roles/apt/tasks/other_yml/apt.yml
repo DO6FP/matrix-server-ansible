@@ -1,0 +1,23 @@
+---
+
+- name: Install packages if Debian based
+  apt:
+    name: unattended-upgrades
+    state: present
+    update_cache: true
+  become: true
+
+- name: Apt Config (/etc/apt.conf.d/10periodic)
+  ansible.builtin.template:
+    src: ../../files/10periodic
+    dest: /etc/apt/apt.conf.d/10periodic
+    owner: root
+    group: root
+    mode: '0644'
+    
+- name: Figure out distribution release via lsb_release
+  shell: lsb_release -c -s
+  register: distributionrelease
+
+- name: Set variable "distributionrelease" for the next step
+  set_fact: distributionrelease={{ distributionrelease.stdout }}

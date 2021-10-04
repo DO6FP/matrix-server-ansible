@@ -1,0 +1,38 @@
+---
+
+- name: install firewalld
+  package:
+    name: firewalld
+    state: present
+
+- name: Open SSH port in firewall
+  ansible.posix.firewalld:
+    service: ssh
+    permanent: yes
+    state: enabled
+    immediate: yes
+#this is seperate so you don't accidentally remove it
+
+#- name: Open services in firewall
+#  ansible.posix.firewalld:
+#    service: "{{ item }}"
+#    permanent: yes
+#    state: enabled
+#    immediate: yes
+#  with_items: "{{ firewall_services }}"
+
+- name: Open ports in firewall
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items: "{{ firewall_ports }}"
+
+#for future use
+
+- name: Enable firewalld on system reboot
+  service:
+    name: firewalld
+    enabled: yes
+    state: started

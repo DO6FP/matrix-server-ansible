@@ -1,0 +1,12 @@
+---
+
+- name: Setting up devices...
+  hosts: all
+  remote_user: root
+#  vars:
+#    - user: dc7ia
+
+  roles:
+    - apt
+    - install_packages
+    - firewalld

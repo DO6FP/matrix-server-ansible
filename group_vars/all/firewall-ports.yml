@@ -1,0 +1,9 @@
+---
+
+firewall_services:
+  - ssh
+  
+firewall_ports:
+  - 80/tcp #http
+  - 443/tcp #https
+  - 8448/tcp #matrix federation

@@ -1,0 +1,8 @@
+---
+
+# to do list:
+
+- name: Include other yaml files
+  include_tasks: "{{ item }}"
+  with_fileglob:
+    - other_yml/*.yml
