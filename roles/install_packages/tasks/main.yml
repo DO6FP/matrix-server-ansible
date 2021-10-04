@@ -1,5 +1,21 @@
 ---
 
+- name: Install packages in preparation for adding repos
+  apt:
+    name: 
+      - apt-transport-https
+      - gpg
+      - gpg-agent
+    state: latest
+    update_cache: true
+  become: true
+  
+  # apt-transport-https:	needed so apt can load via https
+  # gpg, gpg-agent:		needed so we can add keyrings in the next step
+  
+- name: Set up Repositories
+  include_tasks: repositories.yml   
+
 - name: Install packages if Debian based
   apt:
     name: "{{ lookup('file', '../package_list.txt').split() }}"
@@ -7,9 +23,6 @@
     update_cache: true
   become: true
   when: ansible_os_family == 'Debian'
-
-- name: Set up Repositories
-  include_tasks: repositories.yml   
  
 - name: Install Matrix Server packages
   apt:
