@@ -6,3 +6,10 @@
     dest=/etc/nginx/
     directory_mode=yes
     mode: '0755'
+    register: nginxconfdir
+   
+- name: Restart nginx on config change
+  ansible.builtin.systemd:
+    state: restarted
+    name: nginx.service
+  when: nginxconfdir.changed
