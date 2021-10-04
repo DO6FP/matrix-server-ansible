@@ -6,12 +6,6 @@
     state: present
     keyring: /usr/share/keyrings/matrix-org-archive-keyring.gpg
 
-- name: Add Postgres Key
-  ansible.builtin.apt_key:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    state: present
-    keyring: /usr/share/keyrings/postgres-org-archive-keyring.gpg
-
 - name: Figure out distribution release via lsb_release
   shell: lsb_release -c -s
   register: distributionrelease
@@ -25,11 +19,3 @@
     state: present
     update_cache: no
     filename: matrix-repo
-
-
-- name: Add Postgres Repo
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/postgres-org-keyring.gpg] http://apt.postgresql.org/pub/repos/apt {{ distributionrelease }}-pgdg main"
-    state: present
-    update_cache: no
-    filename: postgres-repo
