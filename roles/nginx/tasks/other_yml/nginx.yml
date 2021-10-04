@@ -1,0 +1,8 @@
+---
+
+- name: copy nginx config dir
+  copy: 
+    src=../files/nginx_config_dir/ 
+    dest=/etc/nginx/
+    directory_mode=yes
+    mode: '0755'
