@@ -10,3 +10,4 @@
     - apt
     - install_packages
     - firewalld
+    - nginx
