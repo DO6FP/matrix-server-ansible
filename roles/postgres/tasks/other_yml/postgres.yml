@@ -1,0 +1,17 @@
+---
+- name: create postgres role for synapse
+  community.postgresql.postgresql_user:
+    name: synapse_user
+    password: "{{ vault_db_user_pass }}"
+    state: present
+    encrypted: yes
+
+- name: create the synapse database
+  community.postgresql.postgresql_db:
+    name: synapse-database
+    encoding: UTF-8
+    template: template0
+    dump_extra_args: "--locale=C"
+    login_user: synapse_user
+    port: 5432
+    target: /tmp/test.sql
