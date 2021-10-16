@@ -1,0 +1,5 @@
+---
+
+matrix_domain: '50ohm.de'
+  
+matrix_letsencrypt_email: 'domain-inquiries@dc7ia.eu'
