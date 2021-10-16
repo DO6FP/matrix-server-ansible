@@ -1,15 +1,43 @@
 ---
 
-- name: Synchronization of src on the control machine to dest on the remote hosts
+- name: Sync Nginx config dir to the server
   ansible.posix.synchronize:
     src: ../files/nginx_config_dir/ 
     dest: /etc/nginx/
     owner: yes
     perms: yes
   register: nginxconfdir
-   
+  
+- name: Create /var/www/_letsencrypt
+  file:
+    path: /var/www/_letsencrypt/
+    state: directory
+    mode: '0755'
+    
 - name: Restart nginx on config change
   ansible.builtin.systemd:
     state: restarted
     name: nginx.service
   when: nginxconfdir.changed
+    
+# Next steps will temporarily disable TLS to let Letsencrypt reach the .well-known dir and to let Certbot complete the acme challenge since we TLS does not yet work without certificates
+
+- name: "Template certbot bootstrap script"
+  template:
+    src: ../templates/bootstrap_tls.sh.j2
+    dest: /root/bootstrap_tls.sh
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Deactivate TLS temporarily to setup Certbot if private key does not exist yet
+  shell: "bash -c /root/bootstrap_tls.sh"
+  register: tlsactivated
+  args:
+    creates: "/etc/letsencrypt/live/50ohm.de/privkey.pem"
+   
+- name: Restart nginx on config change
+  ansible.builtin.systemd:
+    state: reloaded
+    name: nginx.service
+  when: tlsactivated.changed
