@@ -15,7 +15,7 @@
     
 - name: Add Synapse Server Repo
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/matrix-org-archive-keyring.gpg] https://packages.matrix.org/debian/ {{ distributionrelease }} main"
+    repo: "deb [signed-by=/usr/share/keyrings/postgres-org-archive-keyring.gpg] https://packages.matrix.org/debian/ {{ distributionrelease }} main"
     state: present
     update_cache: no
     filename: matrix-repo
