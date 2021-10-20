@@ -18,6 +18,8 @@
 - name: Figure out distribution release via lsb_release
   shell: lsb_release -c -s
   register: distributionrelease
+  check_mode: no
 
 - name: Set variable "distributionrelease" for the next step
   set_fact: distributionrelease={{ distributionrelease.stdout }}
+  check_mode: no
