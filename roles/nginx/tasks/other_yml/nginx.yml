@@ -21,7 +21,7 @@
   when: nginxconfdir.changed
   
 - name: Create symbolic link for Nginx config (TLS) (1/2)
-  shell: "ln -s /etc/nginx/sites-available/{{ matrix_domain }}.conf.tls /etc/nginx/sites-available/{{ matrix_domain }}.de.conf"
+  shell: "ln -sf /etc/nginx/sites-available/{{ matrix_domain }}.conf.tls /etc/nginx/sites-available/{{ matrix_domain }}.de.conf"
   register: nginxsymlink
   args:
     removes: "/etc/letsencrypt/live/{{ matrix_domain }}/privkey.pem"
@@ -40,7 +40,7 @@
     # do not run this task if we do not have a certificate yet
     
 - name: Create symbolic link for Nginx config (TLS) (2/2)
-  shell: "ln -s /etc/nginx/sites-available/{{ matrix_domain }}.conf.no-tls /etc/nginx/sites-available/{{ matrix_domain }}.de.conf"
+  shell: "ln -sf /etc/nginx/sites-available/{{ matrix_domain }}.conf.no-tls /etc/nginx/sites-available/{{ matrix_domain }}.de.conf"
   register: nginxsymlink
   args:
     creates: "/etc/letsencrypt/live/{{ matrix_domain }}/privkey.pem"
