@@ -4,8 +4,8 @@
   ansible.posix.synchronize:
     src: ../files/nginx_config_dir/ 
     dest: /etc/nginx/
-    owner: yes
-    perms: yes
+    owner: no
+    perms: no
   register: nginxconfdir
   
 - name: Create /var/www/_letsencrypt
@@ -19,8 +19,48 @@
     state: restarted
     name: nginx.service
   when: nginxconfdir.changed
+  
+- name: Create symbolic link for Nginx config (TLS) (1/2)
+  shell: "ln -s /etc/nginx/sites-available/{{ matrix_domain }}.conf.tls /etc/nginx/sites-available/{{ matrix_domain }}.de.conf"
+  register: nginxsymlink
+  args:
+    removes: "/etc/letsencrypt/live/{{ matrix_domain }}/privkey.pem"
+  # do not run this task if we do not have a certificate yet
     
-# Next steps will temporarily disable TLS to let Letsencrypt reach the .well-known dir and to let Certbot complete the acme challenge since we TLS does not yet work without certificates
+#- name: Create symbolic link for Nginx config (TLS) (1/2)
+#  ansible.builtin.file:
+#    src: /etc/nginx/sites-available/50ohm.de.conf.tls
+#    dest: /etc/nginx/sites-available/50ohm.de.conf
+#    force: yes
+#    owner: root
+#    group: root
+#    state: link
+#  args:
+#    removes: "/etc/letsencrypt/live/50ohm.de/privkey.pem"
+    # do not run this task if we do not have a certificate yet
+    
+- name: Create symbolic link for Nginx config (TLS) (2/2)
+  shell: "ln -s /etc/nginx/sites-available/{{ matrix_domain }}.conf.no-tls /etc/nginx/sites-available/{{ matrix_domain }}.de.conf"
+  register: nginxsymlink
+  args:
+    creates: "/etc/letsencrypt/live/{{ matrix_domain }}/privkey.pem"
+    # do not enable TLS because we do not have a certificate yet
+      
+#- name: Create symbolic link for Nginx config (TLS) (2/2)
+#  ansible.builtin.file:
+#    src: /etc/nginx/sites-available/50ohm.de.conf.no-tls
+#    dest: /etc/nginx/sites-available/50ohm.de.conf
+#    force: yes
+#    owner: root
+#    group: root
+#    state: link
+#  args:
+#    creates: "/etc/letsencrypt/live/50ohm.de/privkey.pem"
+    # do not enable TLS because we do not have a certificate yet
+      
+# Next: Script removes the symlink to the Nginx TLS config, fetches certs via Letsencrypt and restarts nginx.service
+# This is so that Letsencrypt can reach the .well-known dir and to let Certbot complete the acme challenge if we do not have TLS yet
+# use this if you need to set up TLS, after that run the Playbook again
 
 - name: "Template certbot bootstrap script"
   template:
@@ -29,15 +69,23 @@
     owner: root
     group: root
     mode: '0644'
-
-- name: Deactivate TLS temporarily to setup Certbot if private key does not exist yet
-  shell: "bash -c /root/bootstrap_tls.sh"
+        
+- name: Get TLS certs from Letsencrypt
+  shell: "certbot certonly --webroot -d {{ matrix_domain }} --email {{ matrix_letsencrypt_email }} -w /var/www/_letsencrypt -n --agree-tos --force-renewal"
   register: tlsactivated
   args:
     creates: "/etc/letsencrypt/live/50ohm.de/privkey.pem"
+
+# deavtivate this until we are sure it works 
    
 - name: Restart nginx on config change
   ansible.builtin.systemd:
     state: reloaded
     name: nginx.service
-  when: tlsactivated.changed
+  when: nginxconfdir.changed
+  
+- name: Restart nginx on symlink change
+  ansible.builtin.systemd:
+    state: reloaded
+    name: nginx.service
+  when: nginxsymlink.changed
